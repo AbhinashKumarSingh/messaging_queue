@@ -1,0 +1,38 @@
+# Redis and RabbitMQ Race Condition Prevention
+
+This Node.js application simulates a race condition when updating a shared resource, such as a counter value. It uses Redis for managing the shared resource and RabbitMQ for communication between different parts of the application. A FIFO queue in Redis is implemented to manage the order of updates and prevent race conditions.
+
+## Requirements
+1. Create a Redis instance to store a counter value.
+2. Implement two separate processes (or threads) that increment the counter value in Redis.
+3. Use a FIFO queue in Redis to manage the order of updates.
+4. Use RabbitMQ to send messages between the processes to coordinate the updates and manage the queue.
+5. Demonstrate how the race condition can lead to unexpected results (e.g., incorrect counter value) without proper queue management.
+
+## Implementation
+
+### Redis Setup
+- The application uses the `ioredis` library to connect to Redis and manage the counter value.
+- A lock mechanism is implemented using Redis to prevent race conditions. The `acquireLock()` and `releaseLock()` functions ensure exclusive access to the counter during increment operations.
+
+### RabbitMQ Integration
+- The `amqplib` library is used to connect to RabbitMQ and send/receive messages.
+- RabbitMQ is used for coordinating updates between processes. When the counter is successfully updated, a message is sent to notify other processes.
+
+### FIFO Queue Management
+- Redis is utilized to create a FIFO queue (`counter_queue`) for managing the order of updates.
+- Messages containing timestamp information are produced to the queue at regular intervals, simulating update requests.
+- Consumer processes listen for messages on the queue and process them accordingly. The `consume()` function is responsible for consuming messages, updating the counter, and acknowledging the messages.
+
+## Usage
+1. Ensure Redis and RabbitMQ are installed and running locally.
+2. start rabbitmq `rabbitmq-server`
+3. start redis `redis-server`
+2. Install dependencies by running `npm install`.
+3. Start the application by running `node app.js`.
+4. The application will start producing and consuming messages, simulating concurrent updates to the counter value.
+5. Monitor the console output to observe the coordination of updates and prevention of race conditions.
+
+## Notes
+- This application demonstrates how to prevent race conditions in a distributed system using Redis and RabbitMQ.
+- Proper locking mechanisms and queue management are essential for ensuring data consistency and preventing unexpected behavior.
